@@ -1,4 +1,4 @@
-package csu.csci325;
+package com.clarktribe.qtn;
 
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -26,7 +26,6 @@ import javax.swing.text.Position;
  * 
  * @author  Geoff Clark
  * @e-mail  gclark82@gmail.com
- * @class   CSU.CSCI325
  * 
  */
 
