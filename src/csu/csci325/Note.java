@@ -1,21 +1,24 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package csu.csci325;
 
 /**
- *
- * @author admingec
+ * 
+ * @author  Geoff Clark
+ * @e-mail  gclark82@gmail.com
+ * @class   CSU.CSCI325
+ * 
  */
+
 class Note {
     private String date;
     private String book;
     private String verse;
     private String note;
+    private String defaultnote;
     
-    public Note(String date, String book, String verse, String note) {
+    public Note(String defaultnote, String date, String book, String verse, 
+            String note) {
+        
+        this.defaultnote = defaultnote;
         this.date = date;
         this.book = book;
         this.verse = verse;
@@ -53,12 +56,22 @@ class Note {
     public void setNote(String date) {
         this.note = note;
     }
+    
+    public String getDefaultnote() {
+        return defaultnote;
+    }
+    
+    public void setDefaultnote(String defaultnote) {
+        this.defaultnote = defaultnote;
+    }
 
     @Override
     public String toString() {
+        String importedNote = date + "," + book + "," + verse + "," + note;
+        if(importedNote.equals(defaultnote)) {
+            return "Create a new note below";
+                    }
         return "Last Edit Date:  " + date + "\n" + "\n" + "Verse: " + book + 
                 " " + verse + "\n" + "\n" + note;
-        
     }
-    
 }

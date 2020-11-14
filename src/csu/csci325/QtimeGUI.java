@@ -16,25 +16,30 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.text.Position;
 
 /**
- * @author Geoff Clark
- * @e-mail gclark82@gmail.com
- * @class CSU.CSCI325
+ * 
+ * @author  Geoff Clark
+ * @e-mail  gclark82@gmail.com
+ * @class   CSU.CSCI325
+ * 
  */
+
 public final class QtimeGUI extends javax.swing.JFrame {
 
     String loadPath = "notes.txt";
-    String bookPath = "books.txt";
+    String bookPath = "books.dat";
     String tempPath = "temp.txt";
+    Boolean defaultState = false;
+    String defaultChar = "*";
+    String defaultMenu = (defaultChar + " " + defaultChar);
+    String defaultNote = (defaultChar + "," + defaultChar + "," + defaultChar + 
+            "," + defaultChar);
          
     public QtimeGUI() throws IOException {
         File filename = new File(loadPath);
@@ -92,7 +97,7 @@ public final class QtimeGUI extends javax.swing.JFrame {
             String line = brLoad.readLine();
             while (line != null) {
                 String[] attributes = line.split(",");
-                Note noteLoad = createNote(attributes);
+                Note noteLoad = createNote(attributes, defaultNote);
                 notes.add(noteLoad);
                 line = brLoad.readLine();
             }
@@ -102,12 +107,12 @@ public final class QtimeGUI extends javax.swing.JFrame {
         return notes;
     }
 
-    private static Note createNote(String[] metadata) {
+    private static Note createNote(String[] metadata, String defaultNote) {
         String date = metadata[0];
         String book = metadata[1];
         String verse = metadata[2];
         String note = metadata[3];
-        return new Note(date, book, verse, note);
+        return new Note(defaultNote, date, book, verse, note);
     }    
     
     private List<Remove> readfromRemoves(String filename) {
@@ -145,7 +150,7 @@ public final class QtimeGUI extends javax.swing.JFrame {
             String line = br2Load.readLine();
             while (line != null) {
                 String[] attributes = line.split(",");
-                Menu menuLoad = createMenu(attributes);
+                Menu menuLoad = createMenu(attributes, defaultMenu);
                 menus.add(menuLoad);
                 line = br2Load.readLine();
             }
@@ -155,10 +160,10 @@ public final class QtimeGUI extends javax.swing.JFrame {
         return menus;
     }
     
-    private static Menu createMenu(String[] metadata) {
+    private static Menu createMenu(String[] metadata, String defaultMenu) {
         String book = metadata[1];
         String verse = metadata[2];
-        return new Menu(book, verse);
+        return new Menu(defaultMenu, book, verse);
     }
     
     public void checkVerse() throws IOException {
@@ -200,6 +205,7 @@ public final class QtimeGUI extends javax.swing.JFrame {
                         System.out.println("N");
                         writer.write(line);
                         writer.newLine();
+                        writer.close();
                     }
                 }
             }
@@ -310,8 +316,12 @@ public final class QtimeGUI extends javax.swing.JFrame {
         output.close();
     }
     
-    public void removalTime() throws Exception {
-       int removeIndex = existingList.getSelectedIndex();
+    public void removePressed() throws Exception {
+        int removeIndex = existingList.getSelectedIndex();
+        removalTime(removeIndex);
+    }
+    
+    public void removalTime(int removeIndex) throws Exception {
        List<Remove> removes = readfromRemoves(loadPath);
          removes.clear();
          removes = readfromRemoves(loadPath);
@@ -319,13 +329,16 @@ public final class QtimeGUI extends javax.swing.JFrame {
        try {
            File inputFile = new File(loadPath);
            File outputFile = new File(tempPath);
-           try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+           try (BufferedReader reader = new BufferedReader(new 
+                FileReader(inputFile));
+             BufferedWriter writer = new BufferedWriter(new 
+                FileWriter(outputFile))) {
                String line = null;
                while ((line = reader.readLine()) != null) {
                    if (!line.equals(linetoRemove)) {
                        writer.write(line);
                        writer.newLine();
+                       writer.close();
                    }
                }
            }
@@ -353,17 +366,27 @@ public final class QtimeGUI extends javax.swing.JFrame {
 
     private void fileCheck(File filename) throws IOException {
         boolean exists = filename.exists();
-        if (exists == false) {
+        if (exists == false || filename.length() <= 0) {
             filename.createNewFile();
             try (FileWriter writer = new FileWriter(filename)) {
                 writer.flush();
+                writer.write(defaultNote + "\n");
+                writer.close();
+                defaultState = true;
             }
+        }
+    }
+    
+    public void checkforDefault() throws Exception {
+        if(defaultState = true) {
+            removalTime(0);
+            restartGUI();
         }
     }
     
     public static void buildBooks(File bookFile) throws IOException {
         boolean exists = bookFile.exists();
-        if (exists == false) {
+        if (exists == false || bookFile.length() <= 0) {
             bookFile.createNewFile();
             try (FileWriter writer = new FileWriter(bookFile)) {
                 writer.write("Genesis" + "\n" + "Exodus" + "\n" + "Leviticus" +
@@ -393,9 +416,19 @@ public final class QtimeGUI extends javax.swing.JFrame {
                         "\n" + "Revelation" + "\n");
                 writer.flush();
                 writer.close();
+                hideFile(bookFile);
             }
         }
     }
+    
+    private static void hideFile(File hide) {
+        try {
+          Process p = Runtime.getRuntime().exec("attrib +H " + hide.getPath());
+          p.waitFor(); 
+        } catch (IOException | InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -599,6 +632,11 @@ public final class QtimeGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
+        try {
+            checkforDefault();
+        } catch (Exception ex) {
+            Logger.getLogger(QtimeGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
         System.exit(0);
     }//GEN-LAST:event_exitButtonActionPerformed
 
@@ -638,6 +676,11 @@ public final class QtimeGUI extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(QtimeGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
+            try {
+                checkforDefault();
+            } catch (Exception ex) {
+                Logger.getLogger(QtimeGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
         restartGUI();
         
         }
@@ -662,7 +705,12 @@ public final class QtimeGUI extends javax.swing.JFrame {
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
         try {
-            removalTime();
+            removePressed();
+        } catch (Exception ex) {
+            Logger.getLogger(QtimeGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            checkforDefault();
         } catch (Exception ex) {
             Logger.getLogger(QtimeGUI.class.getName()).log(Level.SEVERE, null, ex);
         }

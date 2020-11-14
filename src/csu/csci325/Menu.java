@@ -1,19 +1,20 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package csu.csci325;
 
 /**
- *
- * @author admingec
+ * 
+ * @author  Geoff Clark
+ * @e-mail  gclark82@gmail.com
+ * @class   CSU.CSCI325
+ * 
  */
+
 class Menu {
     private String book;
     private String verse;
+    private String defaultmenu;
     
-    public Menu(String book, String verse) {
+    public Menu(String defaultmenu, String book, String verse) {
+        this.defaultmenu = defaultmenu;
         this.book = book;
         this.verse = verse;
     }
@@ -34,10 +35,22 @@ class Menu {
         this.verse = verse;
     }
     
+    public String getDefaultmenu() {
+        return defaultmenu;
+    }
+    
+    public void setDefaultmenu(String defaultmenu) {
+        this.defaultmenu = defaultmenu;
+    }
+    
     @Override
     public String toString() {
-        return book + " " + verse;
-        
+        String finalMenu = (book + " " + verse);
+        if(finalMenu.equals(defaultmenu)) {
+            return "[Create a new note]";
+        } else {
+            return finalMenu;
+        }
     }
     
 }
